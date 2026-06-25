@@ -1,0 +1,52 @@
+{% extends "index.html" %}
+{% block content %}
+<h1 style="margin-bottom:20px;">History</h1>
+
+<div id="history"></div>
+
+<script>
+function loadHistory(){
+    fetch("/history-data")
+    .then(res=>res.json())
+    .then(data=>{
+        let container = document.getElementById("history");
+        container.innerHTML = "";
+
+        if(!data || data.length === 0){
+            container.innerHTML = `
+                <div class="card" style="color:#9a9a9e;">
+                    No downloads yet
+                </div>
+            `;
+            return;
+        }
+
+        data.forEach(item=>{
+            let div = document.createElement("div");
+            div.className = "card";
+
+            div.innerHTML = `
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    
+                    <div>
+                        <div style="font-weight:500;">${item.title}</div>
+                        <div style="font-size:13px;color:#9a9a9e;">
+                            ${item.count} images
+                        </div>
+                    </div>
+
+                    <div style="font-size:12px;color:#666;text-align:right;">
+                        ${item.folder}
+                    </div>
+
+                </div>
+            `;
+
+            container.appendChild(div);
+        });
+    });
+}
+
+loadHistory();
+</script>
+{% endblock %}

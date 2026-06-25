@@ -1,0 +1,16 @@
+node_modules/
+dist/
+build/
+.next/
+.cache/
+.env
+.env.*
+*.log
+*.zip
+*.rar
+*.7z
+*.mp4
+*.mkv
+*.mov
+*.exe
+*.iso

@@ -1,0 +1,111 @@
+{% extends "index.html" %}
+{% block content %}
+<h1 style="margin-bottom:20px;">Downloads</h1>
+<!-- INPUT CARD -->
+<div class="card" style="max-width:800px;">
+    <textarea id="urls" placeholder="Paste Imgbox URLs (comma separated)..."></textarea>
+    <button onclick="startDownload()">Download</button>
+</div>
+
+<!-- JOB LIST -->
+<div id="jobs" style="margin-top:25px;"></div>
+
+<script>
+let jobs = {};
+let active = [];
+
+/* START DOWNLOAD */
+function startDownload(){
+    let urls = document.getElementById("urls").value.trim();
+    if(!urls) return;
+
+    fetch("/download",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({urls})
+    })
+    .then(res=>res.json())
+    .then(data=>{
+        active = data.gids;
+    });
+}
+
+/* CREATE CARD */
+function createCard(id, data){
+    let div = document.createElement("div");
+    div.className = "card";
+    div.id = id;
+
+    div.innerHTML = `
+        <div style="display:flex;justify-content:space-between;">
+            <div>
+                <div style="font-weight:500;">${data.title}</div>
+                <div style="color:#9a9a9e;font-size:13px;">
+                    <span class="status">${data.status}</span>
+                    (<span class="done">0</span>/<span class="total">0</span>)
+                </div>
+            </div>
+
+            <div style="display:flex;gap:6px;">
+                <button onclick="control('${id}','pause')">⏸</button>
+                <button onclick="control('${id}','resume')">▶</button>
+                <button onclick="control('${id}','cancel')" style="background:#ff453a;">✕</button>
+            </div>
+        </div>
+
+        <div class="bar">
+            <div class="fill"></div>
+        </div>
+    `;
+
+    document.getElementById("jobs").appendChild(div);
+    jobs[id] = div;
+}
+
+/* UPDATE LOOP */
+function update(){
+    fetch("/status")
+    .then(res=>res.json())
+    .then(data=>{
+        active.forEach(id=>{
+            let j = data[id];
+            if(!j) return;
+
+            if(!jobs[id]){
+                createCard(id, j);
+            }
+
+            let el = jobs[id];
+
+            el.querySelector(".status").innerText = j.status;
+            el.querySelector(".done").innerText = j.done;
+            el.querySelector(".total").innerText = j.total;
+
+            let percent = j.total ? (j.done / j.total) * 100 : 0;
+            el.querySelector(".fill").style.width = percent + "%";
+
+            /* AUTO FADE ON COMPLETE */
+            if(j.status === "Done" && !el.dataset.done){
+                el.dataset.done = true;
+
+                setTimeout(()=>{
+                    el.style.opacity = "0.6";
+                },500);
+            }
+        });
+    });
+}
+
+/* CONTROLS */
+function control(id, action){
+    fetch("/control",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({id, action})
+    });
+}
+
+/* POLL */
+setInterval(update, 1000);
+</script>
+{% endblock %}

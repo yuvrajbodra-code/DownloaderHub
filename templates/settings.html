@@ -1,0 +1,59 @@
+{% extends "index.html" %}
+{% block content %}
+<h1 style="margin-bottom:20px;">Settings</h1>
+
+<!-- APPEARANCE -->
+<div class="card" style="max-width:700px;">
+
+    <div style="margin-bottom:20px;">
+        <div style="font-weight:500;">Appearance</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:8px;">
+            Toggle light / dark mode
+        </div>
+
+        <button onclick="toggleTheme()">Toggle Theme</button>
+    </div>
+
+    <!-- PERFORMANCE -->
+    <div style="margin-top:25px;">
+        <div style="font-weight:500;">Performance</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:8px;">
+            Control download speed (threads)
+        </div>
+
+        <input type="range" id="threads" min="2" max="16" value="10">
+
+        <div style="margin-top:5px;font-size:13px;color:var(--muted);">
+            Threads: <span id="threadValue">10</span>
+        </div>
+    </div>
+
+    <!-- STORAGE -->
+    <div style="margin-top:25px;">
+        <div style="font-weight:500;">Storage</div>
+        <div style="font-size:13px;color:var(--muted);">
+            Default folder: /downloads
+        </div>
+    </div>
+
+</div>
+
+<script>
+// THREAD SLIDER
+let slider = document.getElementById("threads");
+let output = document.getElementById("threadValue");
+
+// load saved
+let saved = localStorage.getItem("threads");
+if(saved){
+    slider.value = saved;
+    output.innerText = saved;
+}
+
+// update
+slider.oninput = function(){
+    output.innerText = this.value;
+    localStorage.setItem("threads", this.value);
+};
+</script>
+{% endblock %}
